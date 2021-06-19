@@ -40,7 +40,7 @@ detector.on('hotword', function (index, hotword, buffer) {
   console.log('hotword', index, hotword);
 });
 
-const mic = record.start({
+const mic = record.record({
   threshold: 0,
   verbose: true
 });
