@@ -1,9 +1,17 @@
 const Models = require('snowboy').Models;
 const Detector = require('snowboy').Detector;
+
 const record = require('node-record-lpcm16');
+const fs = require('fs');
+const WavFileWriter = require('wav').FileWriter;
+
+// Constants
+const micThreshold = 0;
+const resultFilePath = 'res.wav';
 
 // States
 let currentState = 0;
+let stream;
 
 const models = new Models();
 
@@ -27,6 +35,9 @@ detector.on('silence', function () {
   currentState = 0;
   
   console.log('Silence');
+
+  stream.end();
+  stream = null;
 });
 
 detector.on('sound', function (buffer) {
@@ -36,6 +47,8 @@ detector.on('sound', function (buffer) {
   // <buffer> contains the last chunk of the audio that triggers the "sound"
   // event. It could be written to a wav stream.
   console.log('sound');
+
+  stream.write(buffer);
 });
 
 detector.on('error', function () {
@@ -52,9 +65,15 @@ detector.on('hotword', function (index, hotword, buffer) {
   // data after the hotword.
   console.log(buffer);
   console.log('hotword', index, hotword);
+
+  stream = new WavFileWriter(resultFilePath, {
+    sampleRate: 8000,
+    bitDepth: 16,
+    channels: 2
+  });
 });
 
 const mic = record.record({
-  threshold: 0.5,
+  threshold: micThreshold,
   verbose: true
 }).stream().pipe(detector);
