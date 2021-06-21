@@ -49,10 +49,9 @@ detector.on('sound', function (buffer) {
   let acc = 0;
   for(val of buffer.values())
   {
-    console.log('       Checking ' + val);
     acc += val;
   }
-  console.log('   Acc = '+acc);
+  console.log('   Acc = '+acc + ' of '+nElem);
   acc /= nElem;
   console.log('   Avr = '+acc);
 
