@@ -44,9 +44,17 @@ detector.on('sound', function (buffer) {
   if(currentState < 1) return; // Only 1 or 2
   currentState = 2;
   
-  // <buffer> contains the last chunk of the audio that triggers the "sound"
-  // event. It could be written to a wav stream.
   console.log('sound');
+  let nElem = buffer.length;
+  let acc = 0;
+  for(val of buffer.values())
+  {
+    console.log('       Checking ' + val);
+    acc += val;
+  }
+  console.log('   Acc = '+acc);
+  acc /= nElem;
+  console.log('   Avr = '+acc);
 
   stream.write(buffer);
 });
@@ -59,10 +67,6 @@ detector.on('hotword', function (index, hotword, buffer) {
   if(currentState != 0) return;
   currentState = 1;
   
-  // <buffer> contains the last chunk of the audio that triggers the "hotword"
-  // event. It could be written to a wav stream. You will have to use it
-  // together with the <buffer> in the "sound" event if you want to get audio
-  // data after the hotword.
   console.log(buffer);
   console.log('hotword', index, hotword);
 
