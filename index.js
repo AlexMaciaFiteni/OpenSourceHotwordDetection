@@ -52,19 +52,19 @@ detector.on('sound', function (buffer) {
   vad.processAudio(buffer, sampleRate).then(res => {
         switch (res) {
             case VAD.Event.ERROR:
-                console.log("Sound Vad: ERROR");
+                console.log(" > Sound Vad: ERROR");
                 break;
             case VAD.Event.NOISE:
-                console.log("Sound Vad: NOISE");
+                console.log(" > Sound Vad: NOISE");
                 break;
             case VAD.Event.SILENCE:
-                console.log("Sound Vad: SILENCE");
+                console.log(" > Sound Vad: SILENCE");
                 break;
             case VAD.Event.VOICE:
-                console.log("Sound Vad: VOICE");
+                console.log(" > Sound Vad: VOICE");
                 break;
         }
-    }).catch(console.log('Error on VAD apply'));
+    }).catch(); //console.log('Error on VAD apply'));
 
   stream.write(buffer);
 });
