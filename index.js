@@ -68,7 +68,6 @@ function OnSound(buffer) {
 function OnSilence(buffer) {
   if(currentState == 1) console.log('Silence but waiting order...');
   if(currentState != 2) return;
-  currentState = 0;
   
   console.log('Silence');
   
@@ -76,6 +75,8 @@ function OnSilence(buffer) {
 
   if(silenceStrikes >= maxSilenceStrikes)
   {
+    currentState = 0;
+    
     stream.end();
     stream = null;
   }
