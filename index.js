@@ -13,9 +13,72 @@ const micThreshold = 0;
 const sampleRate = 8000;
 const resultFilePath = 'res.wav';
 
+let bufferSize = 4096;
+
 // States
 let currentState = 0;
 let stream;
+let silenceStrikes = 0;
+const maxSilenceStrikes = 4;
+
+// Events
+function OnHotword(buffer) {
+  if(currentState != 0) return;
+  currentState = 1;
+  
+  console.log('Hotword detected!');
+  
+  bufferSize = buffer.length;
+  silenceStrikes = 0;
+
+  stream = new WavFileWriter(resultFilePath, {
+    sampleRate: sampleRate,
+    bitDepth: 16,
+    channels: 2
+  });
+}
+
+function ClassifyBuffer(buffer) {
+  vad.processAudio(buffer, sampleRate).then(res => {
+    switch (res) {
+        case VAD.Event.ERROR:
+        case VAD.Event.SILENCE:
+            OnSilence(buffer);
+            break;
+        case VAD.Event.NOISE:
+        case VAD.Event.VOICE:
+            OnSound(buffer);
+            break;
+    }
+  }).catch();
+  
+  stream.write(buffer);
+}
+
+function OnSound(buffer) {
+  if(currentState < 1) return; // Only 1 or 2
+  currentState = 2;
+  
+  silenceStrikes = 0;
+  
+  console.log('Sound');
+}
+
+function OnSilence(buffer) {
+  if(currentState == 1) console.log('Silence but waiting order...');
+  if(currentState != 2) return;
+  currentState = 0;
+  
+  console.log('Silence');
+  
+  silenceStrikes++;
+
+  if(silenceStrikes >= maxSilenceStrikes)
+  {
+    stream.end();
+    stream = null;
+  }
+}
 
 const models = new Models();
 
@@ -32,59 +95,18 @@ const detector = new Detector({
   applyFrontend: true
 });
 
-// Events
-detector.on('silence', function () {
-  if(currentState == 1) console.log('Silence but waiting order...');
-  if(currentState != 2) return;
-  currentState = 0;
-  
-  console.log('Silence');
+// Snowboy Events
+detector.on('hotword', function (index, hotword, buffer)
+  { OnHotword(buffer); });
 
-  stream.end();
-  stream = null;
-});
+detector.on('sound', function (buffer)
+  { ClassifyBuffer(buffer); });
 
-detector.on('sound', function (buffer) {
-  if(currentState < 1) return; // Only 1 or 2
-  currentState = 2;
-  
-  console.log('sound');
-  vad.processAudio(buffer, sampleRate).then(res => {
-        switch (res) {
-            case VAD.Event.ERROR:
-                console.log(" > Sound Vad: ERROR");
-                break;
-            case VAD.Event.NOISE:
-                console.log(" > Sound Vad: NOISE");
-                break;
-            case VAD.Event.SILENCE:
-                console.log(" > Sound Vad: SILENCE");
-                break;
-            case VAD.Event.VOICE:
-                console.log(" > Sound Vad: VOICE");
-                break;
-        }
-    }).catch(); //console.log('Error on VAD apply'));
-
-  stream.write(buffer);
-});
+detector.on('silence', function ()
+  { ClassifyBuffer(Buffer.alloc(bufferSize, 0)); });
 
 detector.on('error', function () {
   console.log('error');
-});
-
-detector.on('hotword', function (index, hotword, buffer) {
-  if(currentState != 0) return;
-  currentState = 1;
-  
-  console.log(buffer);
-  console.log('hotword', index, hotword);
-
-  stream = new WavFileWriter(resultFilePath, {
-    sampleRate: sampleRate,
-    bitDepth: 16,
-    channels: 2
-  });
 });
 
 const mic = record.record({
