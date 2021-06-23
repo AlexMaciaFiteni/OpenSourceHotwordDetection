@@ -4,9 +4,13 @@ const Detector = require('snowboy').Detector;
 const record = require('node-record-lpcm16');
 const fs = require('fs');
 const WavFileWriter = require('wav').FileWriter;
+const VAD = require('node-vad');
+
+const vad = new VAD(VAD.Mode.NORMAL);
 
 // Constants
 const micThreshold = 0;
+const sampleRate = 8000;
 const resultFilePath = 'res.wav';
 
 // States
@@ -45,15 +49,22 @@ detector.on('sound', function (buffer) {
   currentState = 2;
   
   console.log('sound');
-  let nElem = buffer.length;
-  let acc = 0;
-  for(val of buffer.values())
-  {
-    acc += val;
-  }
-  console.log('   Acc = '+acc + ' of '+nElem);
-  acc /= nElem;
-  console.log('   Avr = '+acc);
+  vad.processAudio(buffer, sampleRate).then(res => {
+        switch (res) {
+            case VAD.Event.ERROR:
+                console.log("Sound Vad: ERROR");
+                break;
+            case VAD.Event.NOISE:
+                console.log("Sound Vad: NOISE");
+                break;
+            case VAD.Event.SILENCE:
+                console.log("Sound Vad: SILENCE");
+                break;
+            case VAD.Event.VOICE:
+                console.log("Sound Vad: VOICE");
+                break;
+        }
+    }).catch(console.log('Error on VAD apply'));
 
   stream.write(buffer);
 });
@@ -70,7 +81,7 @@ detector.on('hotword', function (index, hotword, buffer) {
   console.log('hotword', index, hotword);
 
   stream = new WavFileWriter(resultFilePath, {
-    sampleRate: 8000,
+    sampleRate: sampleRate,
     bitDepth: 16,
     channels: 2
   });
