@@ -17,7 +17,7 @@ let bufferSize = 4096;
 
 // States
 let currentState = 0;
-let stream;
+let stream = null;
 let silenceStrikes = 0;
 const maxSilenceStrikes = 4;
 
@@ -52,7 +52,8 @@ function ClassifyBuffer(buffer) {
     }
   }).catch();
   
-  stream.write(buffer);
+  if(stream)
+    stream.write(buffer);
 }
 
 function OnSound(buffer) {
