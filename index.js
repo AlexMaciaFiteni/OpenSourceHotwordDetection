@@ -21,7 +21,7 @@ const resultFilePath = 'res.wav';
 const speaker = new Speaker({
   channels: 2,          // 2 channels
   bitDepth: 16,         // 16-bit samples
-  sampleRate: sampleRate
+  sampleRate: 11025
 });
 
 let bufferSize = 4096;
