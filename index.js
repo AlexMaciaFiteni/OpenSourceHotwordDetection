@@ -7,9 +7,11 @@ const record = require('node-record-lpcm16');
 const Readable = require('stream').Readable;
 const Speaker = require('speaker');
 const WavFileWriter = require('wav').FileWriter;
+const WavReader = require('wav').Reader;
 const VAD = require('node-vad');
 
 const vad = new VAD(VAD.Mode.NORMAL);
+const wavReader = new WavReader();
 
 // Constants
 const voiceServiceHost = '192.168.1.150';
@@ -100,11 +102,14 @@ function PlayOnSpeakers(data) {
   resstream.write(data);
   resstream.end();
   
-  let stream = new Readable({ read() {} });
-  stream.push(data);
-  stream.push(null);
+  wavReader.on('format', function(format) {
+    wavReader.pipe(new Speaker(format));
+  });
+  let speakerStream = new Readable({ read() {} });
+  speakerStream.push(data);
+  speakerStream.push(null);
   
-  stream.pipe(speaker);
+  speakerStream.pipe(wavReader);
 }
 
 function StartFileWriting(filepath) {
