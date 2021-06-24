@@ -3,6 +3,8 @@ const Detector = require('snowboy').Detector;
 
 const http = require('http');
 const record = require('node-record-lpcm16');
+
+const Readable = require('stream').Readable;
 const Speaker = require('speaker');
 const WavFileWriter = require('wav').FileWriter;
 const VAD = require('node-vad');
@@ -90,7 +92,11 @@ function OnSilence(buffer) {
 
 // Helper actions
 function PlayOnSpeakers(data) {
-  data.pipe(speaker);
+  let stream = new Readable();
+  stream.push(data);
+  stream.push(null);
+  
+  stream.pipe(speaker);
 }
 
 function StartFileWriting() {
