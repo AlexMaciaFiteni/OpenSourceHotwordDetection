@@ -43,7 +43,7 @@ function OnHotword(buffer) {
   bufferSize = buffer.length;
   silenceStrikes = 0;
 
-  StartFileWriting();
+  StartFileWriting(resultFilePath);
   StartHTTPRequest();
 }
 
@@ -92,7 +92,13 @@ function OnSilence(buffer) {
 
 // Helper actions
 function PlayOnSpeakers(data) {
-  require('fs').writeFileSync('server.wav', data);
+  let resstream = new WavFileWriter('server.wav', {
+    sampleRate: 22050,
+    bitDepth: 16,
+    channels: 2
+  });
+  resstream.write(buffer);
+  resstream.end();
   
   let stream = new Readable();
   stream.push(data);
@@ -101,8 +107,8 @@ function PlayOnSpeakers(data) {
   stream.pipe(speaker);
 }
 
-function StartFileWriting() {
-  stream = new WavFileWriter(resultFilePath, {
+function StartFileWriting(filepath) {
+  stream = new WavFileWriter(filepath, {
     sampleRate: sampleRate,
     bitDepth: 16,
     channels: 2
