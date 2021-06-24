@@ -92,6 +92,8 @@ function OnSilence(buffer) {
 
 // Helper actions
 function PlayOnSpeakers(data) {
+  require('fs').writeFileSync('server.wav', data);
+  
   let stream = new Readable();
   stream.push(data);
   stream.push(null);
