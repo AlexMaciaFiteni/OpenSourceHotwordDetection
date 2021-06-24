@@ -120,7 +120,7 @@ function StartHTTPRequest() {
 }
 
 function WriteChunkToServer(buffer) {
-  if(httpRequest) httpRequest.write(data);
+  if(httpRequest) httpRequest.write(buffer);
 }
 
 function FinishHTTPRequest() {
