@@ -60,9 +60,6 @@ function ClassifyBuffer(buffer) {
             break;
     }
   }).catch();
-  
-  WriteChunkToFile(buffer);
-  WriteChunkToServer(buffer);
 }
 
 function OnSound(buffer) {
@@ -70,6 +67,9 @@ function OnSound(buffer) {
   currentState = 2;
   
   silenceStrikes = 0;
+  
+  WriteChunkToFile(buffer);
+  WriteChunkToServer(buffer);
   
   console.log('Sound');
 }
