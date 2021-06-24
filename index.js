@@ -97,7 +97,7 @@ function PlayOnSpeakers(data) {
     bitDepth: 16,
     channels: 2
   });
-  resstream.write(buffer);
+  resstream.write(data);
   resstream.end();
   
   let stream = new Readable();
