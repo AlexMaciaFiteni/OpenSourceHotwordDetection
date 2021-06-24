@@ -16,10 +16,10 @@ const resultFilePath = 'res.wav';
 let bufferSize = 4096;
 
 // States
+const maxSilenceStrikes = 8;
+let silenceStrikes = 0;
 let currentState = 0;
 let stream = null;
-let silenceStrikes = 0;
-const maxSilenceStrikes = 4;
 
 // Events
 function OnHotword(buffer) {
@@ -69,9 +69,9 @@ function OnSilence(buffer) {
   if(currentState == 1) console.log('Silence but waiting order...');
   if(currentState != 2) return;
   
-  console.log('Silence');
-  
   silenceStrikes++;
+  
+  console.log('Silence: '+silenceStrikes);
 
   if(silenceStrikes >= maxSilenceStrikes)
   {
