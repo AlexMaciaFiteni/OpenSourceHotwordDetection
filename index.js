@@ -1,14 +1,16 @@
 const Models = require('snowboy').Models;
 const Detector = require('snowboy').Detector;
 
+const http = require('http');
 const record = require('node-record-lpcm16');
-const fs = require('fs');
 const WavFileWriter = require('wav').FileWriter;
 const VAD = require('node-vad');
 
 const vad = new VAD(VAD.Mode.NORMAL);
 
 // Constants
+const voiceServiceHost = '192.168.1.150';
+const voiceServicePort = 8080;
 const micThreshold = 0;
 const sampleRate = 8000;
 const resultFilePath = 'res.wav';
@@ -20,6 +22,7 @@ const maxSilenceStrikes = 8;
 let silenceStrikes = 0;
 let currentState = 0;
 let stream = null;
+let httpRequest = null;
 
 // Events
 function OnHotword(buffer) {
@@ -31,11 +34,8 @@ function OnHotword(buffer) {
   bufferSize = buffer.length;
   silenceStrikes = 0;
 
-  stream = new WavFileWriter(resultFilePath, {
-    sampleRate: sampleRate,
-    bitDepth: 16,
-    channels: 2
-  });
+  StartStream();
+  StartHTTPRequest();
 }
 
 function ClassifyBuffer(buffer) {
@@ -52,8 +52,8 @@ function ClassifyBuffer(buffer) {
     }
   }).catch();
   
-  if(stream)
-    stream.write(buffer);
+  WriteChunkToFile(buffer);
+  WriteChunkToServer(buffer);
 }
 
 function OnSound(buffer) {
@@ -76,10 +76,56 @@ function OnSilence(buffer) {
   if(silenceStrikes >= maxSilenceStrikes)
   {
     currentState = 0;
-    
-    stream.end();
-    stream = null;
+    FinishFileWriting();
+    FinishHTTPRequest();
   }
+}
+
+// Helper actions
+function StartFileWriting() {
+  stream = new WavFileWriter(resultFilePath, {
+    sampleRate: sampleRate,
+    bitDepth: 16,
+    channels: 2
+  });
+}
+
+function WriteChunkToFile(buffer) {
+  if(stream) stream.write(buffer);
+}
+
+function FinishFileWriting() {
+  stream.end();
+  stream = null;
+}
+
+function StartHTTPRequest() {
+  const options = {
+    hostname: voiceServiceHost,
+    port: voiceServicePort,
+    path: '',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/octet-stream' // Generic binary data
+    }
+  };
+    
+  httpRequest = http.request(options, res => {
+    res.on('data', d => {
+      console.log('Server said '+d + ' ('+res.statusCode+')');
+    })
+  });
+
+  httpRequest.on('error', error => { console.error(error); });
+}
+
+function WriteChunkToServer(buffer) {
+  if(httpRequest) httpRequest.write(data);
+}
+
+function FinishHTTPRequest() {
+  httpRequest.end();
+  httpRequest = null;
 }
 
 const models = new Models();
