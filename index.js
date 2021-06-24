@@ -34,7 +34,7 @@ function OnHotword(buffer) {
   bufferSize = buffer.length;
   silenceStrikes = 0;
 
-  StartStream();
+  StartFileWriting();
   StartHTTPRequest();
 }
 
