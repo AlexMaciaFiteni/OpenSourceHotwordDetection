@@ -3,6 +3,7 @@ const Detector = require('snowboy').Detector;
 
 const http = require('http');
 const record = require('node-record-lpcm16');
+const Speaker = require('speaker');
 const WavFileWriter = require('wav').FileWriter;
 const VAD = require('node-vad');
 
@@ -14,6 +15,12 @@ const voiceServicePort = 8080;
 const micThreshold = 0;
 const sampleRate = 8000;
 const resultFilePath = 'res.wav';
+
+const speaker = new Speaker({
+  channels: 2,          // 2 channels
+  bitDepth: 16,         // 16-bit samples
+  sampleRate: sampleRate
+});
 
 let bufferSize = 4096;
 
@@ -82,6 +89,10 @@ function OnSilence(buffer) {
 }
 
 // Helper actions
+function PlayOnSpeakers(data) {
+  data.pipe(speaker);
+}
+
 function StartFileWriting() {
   stream = new WavFileWriter(resultFilePath, {
     sampleRate: sampleRate,
@@ -111,9 +122,9 @@ function StartHTTPRequest() {
   };
     
   httpRequest = http.request(options, res => {
-    res.on('data', d => {
-      console.log('Server said '+d + ' ('+res.statusCode+')');
-    })
+    let body = Buffer.alloc(0);
+    res.on('data', chunk => { body = Buffer.concat([body, chunk], body.length + chunk.length) });
+    res.on('end', () => { PlayOnSpeakers(body); });
   });
 
   httpRequest.on('error', error => { console.error(error); });
@@ -128,6 +139,7 @@ function FinishHTTPRequest() {
   httpRequest = null;
 }
 
+// Snowboy data
 const models = new Models();
 
 models.add({
