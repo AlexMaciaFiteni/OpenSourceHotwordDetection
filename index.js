@@ -93,14 +93,14 @@ function OnSilence(buffer) {
 // Helper actions
 function PlayOnSpeakers(data) {
   let resstream = new WavFileWriter('server.wav', {
-    sampleRate: 22050,
+    sampleRate: 11025,
     bitDepth: 16,
     channels: 2
   });
   resstream.write(data);
   resstream.end();
   
-  let stream = new Readable();
+  let stream = new Readable({ read() {} });
   stream.push(data);
   stream.push(null);
   
