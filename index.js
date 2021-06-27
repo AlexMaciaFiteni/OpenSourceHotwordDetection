@@ -86,6 +86,7 @@ function ClassifyBuffer(buffer) {
 
 function OnSound(buffer) {
   if(currentState < 1) return; // Only 1 or 2
+  if(currentState != 2) ledController.send('listen');
   currentState = 2;
   
   silenceStrikes = 0;
@@ -110,14 +111,19 @@ function OnSilence() {
     currentState = 0;
     FinishFileWriting();
     FinishHTTPRequest();
-    ledController.send('stop');
+    ledController.send('think');
   }
 }
 
 // Helper actions
 function PlayOnSpeakers(data) {
+  ledController.send('speak');
+	
   wavReader.on('format', function(format) {
     wavReader.pipe(new Speaker(format));
+  });
+  wavReader.on('end', function() {
+    ledController.send('off');
   });
   let speakerStream = new Readable({ read() {} });
   speakerStream.push(data);
