@@ -40,14 +40,15 @@ var ledCnt_ScriptPath = 'led_controller.py';
 const {PythonShell} = require('python-shell');
 var ledCnt_pyOptions = {
   mode: 'text',
-  args: [20]
+  args: [20],
+  pythonPath: '/usr/bin/python'
 };
 var ledController = new PythonShell(ledCnt_ScriptPath, ledCnt_pyOptions);
 
 ledController.on('message', function(message) {
 	console.log(" > PY: "+message);
 });
-ledController.end(function(err) {
+ledController.on('end', function(err) {
 	if(err) { console.log(' > PY error:'); throw err; };
 	console.log(' > PY has finished');
 });

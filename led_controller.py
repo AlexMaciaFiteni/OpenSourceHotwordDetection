@@ -16,7 +16,7 @@ pixel_ring.set_brightness(20)
 
 print('[INFO]: LEDs ready, beggin reading')
 while True:
-    data = input("")
+    data = raw_input("")
     if data == 'wakeup':
         pixel_ring.wakeup()
     elif data == 'stop':
