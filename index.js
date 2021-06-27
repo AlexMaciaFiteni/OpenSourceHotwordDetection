@@ -48,9 +48,11 @@ var ledController = new PythonShell(ledCnt_ScriptPath, ledCnt_pyOptions);
 ledController.on('message', function(message) {
 	console.log(" > PY: "+message);
 });
-ledController.on('end', function(err) {
-	if(err) { console.log(' > PY error:'); throw err; };
-	console.log(' > PY has finished');
+
+process.on('SIGINT', function() {
+  console.log('Control C eh you');
+  ledController.send('stop');
+  process.exit();
 });
 
 // Events
