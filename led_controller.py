@@ -1,4 +1,5 @@
 import time
+import sys
 
 from pixel_ring import pixel_ring
 import mraa
@@ -13,10 +14,15 @@ en.write(0)
 
 pixel_ring.set_brightness(20)
 
-if __name__ == '__main__':
-  pixel_ring.wakeup()
-  print('Potatoooo')
-  time.sleep(4)
-  pixel_ring.off()
-  time.sleep(1)
+print('[INFO]: LEDs ready, beggin reading')
+while True:
+    data = input("")
+    if data == 'wakeup':
+        pixel_ring.wakeup()
+    elif data == 'stop':
+        break
+        
+print('[INFO]: LED controller turned off')
+pixel_ring.off()
+time.sleep(1)
 en.write(1)
