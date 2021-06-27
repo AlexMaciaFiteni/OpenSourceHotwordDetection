@@ -35,6 +35,23 @@ let currentState = 0;
 let stream = null;
 let httpRequest = null;
 
+// LED controller
+var ledCnt_ScriptPath = 'led_controller.py';
+const {PythonShell} = require('python-shell');
+var ledCnt_pyOptions = {
+  mode: 'text',
+  args: [20]
+};
+var ledController = new PythonShell(ledCnt_ScriptPath, ledCnt_pyOptions);
+
+ledController.on('message', function(message) {
+	console.log(" > PY: "+message);
+});
+ledController.end(function(err) {
+	if(err) { console.log(' > PY error:'); throw err; };
+	console.log(' > PY has finished');
+});
+
 // Events
 function OnHotword(buffer) {
   if(currentState != 0) return;
@@ -47,6 +64,8 @@ function OnHotword(buffer) {
 
   StartFileWriting(resultFilePath);
   StartHTTPRequest();
+  
+  ledController.send('wakeup');
 }
 
 function ClassifyBuffer(buffer) {
@@ -90,6 +109,7 @@ function OnSilence() {
     currentState = 0;
     FinishFileWriting();
     FinishHTTPRequest();
+    ledController.send('stop');
   }
 }
 
