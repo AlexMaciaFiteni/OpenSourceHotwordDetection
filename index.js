@@ -54,7 +54,7 @@ function ClassifyBuffer(buffer) {
     switch (res) {
         case VAD.Event.ERROR:
         case VAD.Event.SILENCE:
-            OnSilence(buffer);
+            OnSilence();
             break;
         case VAD.Event.NOISE:
         case VAD.Event.VOICE:
@@ -76,13 +76,14 @@ function OnSound(buffer) {
   console.log('Sound');
 }
 
-function OnSilence(buffer) {
+function OnSilence() {
   if(currentState == 1) console.log('Silence but waiting order...');
   if(currentState != 2) return;
   
   silenceStrikes++;
   
   console.log('Silence: '+silenceStrikes);
+  // Buffer.alloc(bufferSize, 0)
 
   if(silenceStrikes >= maxSilenceStrikes)
   {
@@ -94,14 +95,6 @@ function OnSilence(buffer) {
 
 // Helper actions
 function PlayOnSpeakers(data) {
-  let resstream = new WavFileWriter('server.wav', {
-    sampleRate: 11025,
-    bitDepth: 16,
-    channels: 2
-  });
-  resstream.write(data);
-  resstream.end();
-  
   wavReader.on('format', function(format) {
     wavReader.pipe(new Speaker(format));
   });
@@ -182,11 +175,10 @@ detector.on('sound', function (buffer)
   { ClassifyBuffer(buffer); });
 
 detector.on('silence', function ()
-  { ClassifyBuffer(Buffer.alloc(bufferSize, 0)); });
+  { OnSilence(); });
 
-detector.on('error', function () {
-  console.log('error');
-});
+detector.on('error', function () 
+  { console.log('Error in Snowboy'); });
 
 const mic = record.record({
   threshold: micThreshold,
