@@ -19,6 +19,14 @@ while True:
     data = raw_input("")
     if data == 'wakeup':
         pixel_ring.wakeup()
+    elif data == 'listen':
+        pixel_ring.listen()
+    elif data == 'think':
+        pixel_ring.think()
+    elif data == 'speak':
+        pixel_ring.speak()
+    elif data == 'off':
+        pixel_ring.off()
     elif data == 'stop':
         break
         
