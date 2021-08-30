@@ -1,2 +1,3 @@
 # Open Source Hotword Detection
-Software para la detección de una palabra de activación personalizada en local, utilizando NodeJS y Snowboy en una placa ReSpeaker Core v2 o en una placa RaspberryPi + ReSpeaker 4-mic array.
+Este repositorio contiene el código que se ejecuta en el dispositivo IoT SAM Device. Su principal funcionalidad es detectar en local una palabra de activación personalizada, y una vez detectada grabar una orden hasta que detecte silencio, para enviar dicha orden a un servicio de voz externo y reproducir su respuesta por los altavoces. Además, cambia los patrones de LEDs del dispositivo para indicar qué está haciendo en cada momento (hablando, esperando, etc…).
+Se ha utilizado Snowboy en su versión para NodeJS, así como node-vad para la detección de silencio y pixel_ring para controlar los patrones de LEDs. Probado en dos prototipos: una ReSpeaker Core v2 y una RaspberryPi + ReSpeaker 4-mic array.
