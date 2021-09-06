@@ -14,7 +14,7 @@ en.write(0)
 
 pixel_ring.set_brightness(20)
 
-print('[INFO]: LEDs ready, beggin reading')
+print('[INFO]: LEDs ready, begin reading')
 while True:
     data = raw_input("")
     if data == 'wakeup':
